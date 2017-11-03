@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="DataAccess">
+	<select id="getSysParamByName" parameterType="string"  resultType="com.dispatchtask.vo.SysParam">
+	    select a.param_name, a.param_value,a.note
+		  from T_SYS_PARAMS a where a.param_name = #{value}   
+	</select>
+
+	<select id="getAllWaitSendSmsTask"  resultType="com.dispatchtask.vo.Smdown">
+		select a.downid,
+		       a.sm_serialphones,
+		       a.sm_content,
+		       a.sm_ismgtype,
+		       a.sm_servicecode,
+		       to_char(a.sm_sendtime, 'yyyy-mm-dd hh24:mi:ss') sm_sendtime,
+		       a.sm_batchno,
+		       a.sm_servicename,
+		       to_char(a.downtime, 'yyyy-mm-dd hh24:mi:ss') downtime,
+		       a.sendlevel,
+		       a.taskstatus
+		  from EFD_SMDOWN a
+		 where a.sm_sendtime &lt;= sysdate
+		   and a.taskstatus = 0
+	     order by sendlevel desc
+	</select>
+
+	<select id="getCusomerById" parameterType="int" resultType="com.dispatchtask.vo.Customer">
+		select a.cust_id,a.cust_code,a.cust_name,a.passwd,a.client_ip,
+		       a.audit_flag,a.threads,a.blacklist_filter,a.sensitive_words_filter,
+		       a.parent_id,a.status,a.create_time,a.create_by,b.send_rate
+		  from t_sms_customer a
+		  left join t_sms_customer_parameter b
+		    on a.cust_id = b.cust_id
+		 where a.cust_id = #{value}
+		   and status = '1'
+	</select>
+
+
+	<update id="updateSmdownStatus" parameterType="com.dispatchtask.vo.Smdown">
+		update EFD_SMDOWN
+		   set taskstatus = 3
+		 where downid = #{downid}
+	</update>
+	
+	<select id="getRptId" resultType="java.lang.Long">
+         select emp_rptid.nextval from dual
+    </select>
+
+	<insert id="insertEfdSmrpt" parameterType="com.dispatchtask.vo.EfdSmrpt">
+		insert into EFD_SMRPT t
+		  (rptid, downid,sm_serialno, sm_recvphone,sm_content,sm_ismgtype,sm_servicecode,sm_sendtime,
+		   sm_batchno,sm_servicename,downtime,sendcode,sendlevel,  gatewayno,messageid,sendtime,res_status,
+		   res_time,rpt_status,rpt_time,rpt_code,subtime,pknumber,pktotal,markinfo)
+		values
+		  (emp_rptid.nextval,#{downid},#{sm_serialno}, #{sm_recvphone},#{sm_content},#{sm_ismgtype},#{sm_servicecode},
+		   to_date(#{sm_sendtime}, 'yyyy-mm-dd hh24:mi:ss'),  #{sm_batchno},#{sm_servicename},
+		   to_date(#{downtime}, 'yyyy-mm-dd hh24:mi:ss'),#{sendcode},#{sendlevel},#{gatewayno},#{messageid},
+		   to_date(#{sendtime}, 'yyyy-mm-dd hh24:mi:ss'),#{res_status},
+		   to_date(#{res_time}, 'yyyy-mm-dd hh24:mi:ss'),#{rpt_status},
+		   to_date(#{rpt_time}, 'yyyy-mm-dd hh24:mi:ss'),#{rpt_code},
+		   sysdate,#{pknumber},#{pktotal},#{markinfo})   
+ 	 </insert>
+	
+	<update id="updateTaskStatusToEnd" parameterType="com.dispatchtask.vo.Smdown">
+		update EFD_SMDOWN
+		   set taskstatus = 1
+		 where downid = #{downid}
+	</update>
+	
+	<update id="initTaskStatus" parameterType="com.dispatchtask.vo.Smdown">
+		update EFD_SMDOWN
+		   set taskstatus = 0
+		 where taskstatus = 3
+	</update>
+	
+	
+	<update id="updateEfdSmrpt" parameterType="com.dispatchtask.vo.EfdSmrpt">
+		 update EFD_SMRPT t 
+    		set t.rpt_status=#{rpt_status},
+            	t.rpt_time = to_date(#{rpt_time},'yyyy-mm-dd hh24:mi:ss'),
+       			t.rpt_code = #{rpt_code}
+          where t.messageid = #{messageid}
+            and t.sm_recvphone = #{sm_recvphone}
+	</update>
+	
+	<insert id="insertEfdSmup" parameterType="com.dispatchtask.vo.EfdSmup">
+		insert into EFD_SMUP
+		  (upid, createtime,fullcode, sm_servicecode,upphone,upcontent,uptime,ismgtype,
+		   gatewayno)
+		values
+		  (EMP_efd_upid.nextval,sysdate,#{fullcode}, #{sm_servicecode},#{upphone},#{upcontent},
+		  to_date(#{uptime}, 'yyyy-mm-dd hh24:mi:ss'),#{ismgtype},#{gatewayno})   
+ 	 </insert>
+ 	 
+ 	 <select id="getProviderMobileList" resultType="com.dispatchtask.vo.ProviderMobilePrefix">
+		select a.mob_pref_id, a.provider_id, a.mobile_prefix
+		  from t_provider_mobile_prefix a
+     </select>
+     
+     <select id="getProviderIdByMobile" resultType="com.dispatchtask.vo.ProviderMobilePrefix" parameterType="string">
+		select a.mob_pref_id, a.provider_id, a.mobile_prefix
+		  from t_provider_mobile_prefix a
+		  where instr(#{value}, h.mobile_prefix )>0
+     </select>
+     
+  
+  
+</mapper>
