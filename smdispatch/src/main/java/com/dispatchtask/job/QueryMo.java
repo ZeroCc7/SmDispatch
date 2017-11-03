@@ -35,7 +35,7 @@ public class QueryMo extends Thread {
 		while (state) {
 			
 			try {
-				Thread.sleep(5000);
+				Thread.sleep(PublicConstants.moSleepTime);
 				String cust_code = "";
 				String password = "";
 				if(index==0){

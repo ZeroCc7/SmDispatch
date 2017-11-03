@@ -35,7 +35,7 @@ public class QueryReport extends Thread {
 		while (state) {
 			
 			try {
-				Thread.sleep(10000);
+				Thread.sleep(PublicConstants.reportSleepTime);
 				String cust_code = "";
 				String password = "";
 				if(index==0){

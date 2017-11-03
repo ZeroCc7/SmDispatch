@@ -44,6 +44,10 @@ public class PublicConstants {
 	public static String firstCustCode = "";
 	public static String firstCustPassword = "";
 
+	public static long reportSleepTime = 10000;
+	
+	public static long moSleepTime = 10000;
+
 	public static String baseUrl = "127.0.0.1:8860";
     /**
      * 初始化系统变量，在smstask工程下的目录下的app.properties
@@ -84,6 +88,9 @@ public class PublicConstants {
 			custId = Integer.parseInt(prop1.getProperty("app.smscustid", "1"));
 			firstSmsCustId = Integer.parseInt(prop1.getProperty("app.firstsmscustid", "100"));
 			baseUrl = prop1.getProperty("app.baseUrl", "127.0.0.1:8860");
+			reportSleepTime = Long.parseLong(prop1.getProperty("app.datCoreSize", "10"));
+			moSleepTime = Long.parseLong(prop1.getProperty("app.datCoreSize", "10"));
+
 			Customer customer = null;
 			Customer firstCustomer = null;
 			try {
